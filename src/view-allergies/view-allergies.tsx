@@ -12,7 +12,7 @@ export default function ViewAllergies(props: PatientUuidProps) {
         if (resp.ok) {
           return resp.json();
         } else {
-          throw Error(`Cannot fetch visits`);
+          throw Error(`Cannot fetch allergies`);
         }
       })
       .then(allergies => {
@@ -20,13 +20,21 @@ export default function ViewAllergies(props: PatientUuidProps) {
       });
   }, []);
 
-  return allergies ? renderValues(allergies) : renderLoader();
+  return allergies ? renderValues() : renderLoader();
 
   function renderLoader() {
-    return <div>No allergies...</div>;
+    return (
+      <div>
+        <p>No allergies...</p>
+        <button className="filled" onClick={onclickAdd}>
+          Add New Allergy
+        </button>
+        {addAllergyUI ? addNewAllergy() : null}
+      </div>
+    );
   }
 
-  function renderValues(allergies) {
+  function renderValues() {
     return (
       <div>
         <table className="table table-striped">
@@ -57,7 +65,7 @@ export default function ViewAllergies(props: PatientUuidProps) {
             <td>{r.reactions[0].reaction.display}</td>
             <td>{r.severity.display}</td>
             <td>{r.comment}</td>
-            <td>{dayjs(r.auditInfo.dateCreated).format("YYYY:MM:DD")}</td>
+            <td>{dayjs(new Date()).format("YYYY:MM:DD")}</td>
             <td>
               <button className="outlined" onClick={event => onClickDelete(r)}>
                 <i className="fa fa-trash text-danger"></i>
@@ -84,7 +92,10 @@ export default function ViewAllergies(props: PatientUuidProps) {
       .then(response => {
         return response;
       })
-      .then(result => {});
+      .then(result => {
+        window.location.reload();
+        // updateStateAfterDelete(result);
+      });
   }
 
   function addNewAllergy() {
@@ -98,9 +109,19 @@ export default function ViewAllergies(props: PatientUuidProps) {
     );
   }
 
+  function updateStateAfterDelete(result) {
+    setAllergies(
+      allergies.results.splice(
+        allergies.results.findIndex(e => e.uuid === result.uuid)
+      )
+    );
+  }
+
   function addAllergy(allergy) {
-    const newAllergies = allergies.results.push(allergy);
-    setAllergies(allergies);
+    const newAllergies = Object.assign({}, allergies, {
+      results: allergies.results.concat(allergy)
+    });
+    setAllergies(newAllergies);
   }
 }
 

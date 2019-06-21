@@ -82,7 +82,7 @@ export default function CreateAllergies(props: AddAllergyProps) {
     return <div>Loading...</div>;
   }
 
-  function handleSubmit() {
+  function handleSubmit(event) {
     event.preventDefault();
     let payload = {
       allergen: {
